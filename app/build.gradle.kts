@@ -9,10 +9,9 @@ android {
     defaultConfig {
         applicationId = "com.venomdino.exonetworkstreamer"
         minSdk = 24
-        //noinspection EditedTargetSdkVersion
         targetSdk = 34
-        versionCode = 12
-        versionName = "2.2"
+        versionCode = 13
+        versionName = "2.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }

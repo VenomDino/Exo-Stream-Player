@@ -1,17 +1,25 @@
 package com.venomdino.exonetworkstreamer.activities;
 
+import android.Manifest;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.content.IntentSender;
+import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.ActionBarDrawerToggle;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.FragmentManager;
 import androidx.media3.common.util.UnstableApi;
 
@@ -33,6 +41,7 @@ import java.util.Objects;
 public class MainActivity extends AppCompatActivity {
 
     private static final int RC_APP_UPDATE = 12345;
+    private static final int PERMISSION_REQUEST_CODE = 54321;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -76,6 +85,10 @@ public class MainActivity extends AppCompatActivity {
 
             return true;
         });
+
+//        ------------------------------------------------------------------------------------------
+
+        checkPermissions();
 
 //        ------------------------------------------------------------------------------------------
 
@@ -145,5 +158,52 @@ public class MainActivity extends AppCompatActivity {
             }
             return false;
         });
+    }
+
+    //    ==============================================================================================
+
+    private void checkPermissions(){
+
+        int permissionReadVideos;
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            permissionReadVideos = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_MEDIA_VIDEO);
+
+            if (permissionReadVideos != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.READ_MEDIA_VIDEO},
+                        PERMISSION_REQUEST_CODE);
+            }
+        } else {
+            permissionReadVideos = ContextCompat.checkSelfPermission(this, Manifest.permission.READ_EXTERNAL_STORAGE);
+
+            if (permissionReadVideos != PackageManager.PERMISSION_GRANTED) {
+
+                ActivityCompat.requestPermissions(MainActivity.this,
+                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        PERMISSION_REQUEST_CODE);
+            }
+        }
+    }
+
+    //   ==============================================================================================
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+
+        if (requestCode == PERMISSION_REQUEST_CODE){
+            if (grantResults.length == 0){
+                Toast.makeText(MainActivity.this, "Please allow media permission.", Toast.LENGTH_SHORT).show();
+
+                Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                intent.setData(android.net.Uri.parse("package:" + getPackageName()));
+                startActivity(intent);
+
+                new Handler().postDelayed(this::finish,2000);
+            }
+        }
     }
 }

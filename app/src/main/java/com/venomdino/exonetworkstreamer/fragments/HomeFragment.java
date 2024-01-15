@@ -50,9 +50,6 @@ public class HomeFragment extends Fragment {
 
         if (activity != null){
 
-            //        ------------------------------------------------------------------------------------------
-
-
             String[] userAgentBrowserNames = getResources().getStringArray(R.array.agent_browsers_names);
             String userAgentPlaceholder = "User-agent (Default)";
 

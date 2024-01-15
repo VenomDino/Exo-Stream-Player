@@ -12,7 +12,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -69,6 +68,7 @@ import com.venomdino.exonetworkstreamer.R;
 import com.venomdino.exonetworkstreamer.helpers.CustomMethods;
 import com.venomdino.exonetworkstreamer.helpers.DoubleClickListener;
 
+import java.io.File;
 import java.net.CookieHandler;
 import java.net.CookieManager;
 import java.net.CookiePolicy;
@@ -82,7 +82,6 @@ import java.util.UUID;
 @UnstableApi
 public class PlayerActivity extends AppCompatActivity {
 
-    private String mediaStreamUrl, drmLicenceUrl, refererValue, userAgent;
     private PlayerView playerView;
     private ProgressBar bufferProgressbar;
     private ExoPlayer exoPlayer;
@@ -107,6 +106,9 @@ public class PlayerActivity extends AppCompatActivity {
     private boolean hasRetried = false;
     private long playbackPosition = C.TIME_UNSET;
     private final HashMap<String, String> requestProperties = new HashMap<>();
+    private String mediaFileUrlOrPath, drmLicenceUrl, refererValue, userAgent;
+    private boolean isLocalFile;
+    private String mediaFileName = "";
 
     private static final CookieManager DEFAULT_COOKIE_MANAGER;
 
@@ -133,32 +135,52 @@ public class PlayerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_player);
         CustomMethods.hideSystemUI(this);
 
+
         Intent intent = getIntent();
 
-        mediaStreamUrl = intent.getStringExtra("mediaStreamUrl");
-        drmLicenceUrl = intent.getStringExtra("drmLicenceUrl");
-        refererValue = intent.getStringExtra("refererValue");
-        userAgent = intent.getStringExtra("userAgent");
-        int selectedDrmScheme = intent.getIntExtra("selectedDrmScheme", 0);
+        mediaFileUrlOrPath = intent.getStringExtra("mediaFileUrlOrPath");
 
-        Log.d("madara", "onCreate: " + userAgent + "\n"+ refererValue);
+        if (intent.hasExtra("drmLicenceUrl")) {
 
-        if (drmLicenceUrl.equalsIgnoreCase("")) {
-            drmLicenceUrl = getString(R.string.default_drm_licence_url);
+            drmLicenceUrl = intent.getStringExtra("drmLicenceUrl");
+
+            if (drmLicenceUrl != null && drmLicenceUrl.equalsIgnoreCase("")) {
+                drmLicenceUrl = getString(R.string.default_drm_licence_url);
+            }
         }
 
-        if (!Objects.equals(refererValue, "")){
-            requestProperties.put("Referer", refererValue);
+        if (intent.hasExtra("refererValue")) {
+            refererValue = intent.getStringExtra("refererValue");
+
+            if (!Objects.equals(refererValue, "")){
+                requestProperties.put("Referer", refererValue);
+            }
         }
 
-        if (selectedDrmScheme == 0) {
-            drmScheme = C.WIDEVINE_UUID;
-        } else if (selectedDrmScheme == 1) {
-            drmScheme = C.PLAYREADY_UUID;
-        } else if (selectedDrmScheme == 2) {
-            drmScheme = C.CLEARKEY_UUID;
-        } else {
-            drmScheme = C.WIDEVINE_UUID;
+        if (intent.hasExtra("userAgent"))
+            userAgent = intent.getStringExtra("userAgent");
+
+        if (intent.hasExtra("mediaFileName"))
+            mediaFileName = intent.getStringExtra("mediaFileName");
+
+
+        if (intent.hasExtra("selectedDrmScheme")){
+
+            int selectedDrmScheme = intent.getIntExtra("selectedDrmScheme", 0);
+
+            if (selectedDrmScheme == 0) {
+                drmScheme = C.WIDEVINE_UUID;
+            } else if (selectedDrmScheme == 1) {
+                drmScheme = C.PLAYREADY_UUID;
+            } else if (selectedDrmScheme == 2) {
+                drmScheme = C.CLEARKEY_UUID;
+            } else {
+                drmScheme = C.WIDEVINE_UUID;
+            }
+        }
+
+        if (intent.hasExtra("isLocalFile")){
+            isLocalFile = intent.getBooleanExtra("isLocalFile", true);
         }
 
         initVars();
@@ -378,49 +400,60 @@ public class PlayerActivity extends AppCompatActivity {
                 .setLoadControl(loadControl)
                 .build();
 
-        if (mediaStreamUrl.toLowerCase().contains(".m3u8") || mediaStreamUrl.toLowerCase().contains(".ts") || mediaStreamUrl.toLowerCase().contains(".playlist")) {
-            MediaSource mediaSource = buildHlsMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
-            exoPlayer.setMediaSource(mediaSource);
-        } else if (mediaStreamUrl.toLowerCase().contains(".mpd")) {
-            MediaSource mediaSource = buildDashMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
-            exoPlayer.setMediaSource(mediaSource, true);
+        if (isLocalFile){
+            exoPlayer.setMediaItem(MediaItem.fromUri(Uri.fromFile(new File(mediaFileUrlOrPath))));
         } else {
 
-            new Thread(() -> {
-                try {
-                    URL url = new URL(mediaStreamUrl);
-                    HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-                    conn.setRequestMethod("HEAD");  // Use HEAD request to check content type
-                    conn.setRequestProperty("User-Agent", userAgent);
-                    conn.setRequestProperty("Referer", refererValue);
+            if (mediaFileUrlOrPath.toLowerCase().contains(".m3u8") || mediaFileUrlOrPath.toLowerCase().contains(".ts") || mediaFileUrlOrPath.toLowerCase().contains(".playlist")) {
 
-                    // Enable following redirects
-                    conn.setInstanceFollowRedirects(true);
+                MediaSource mediaSource = buildHlsMediaSource(Uri.parse(mediaFileUrlOrPath), userAgent, drmLicenceUrl);
+                exoPlayer.setMediaSource(mediaSource);
 
-                    if (conn.getResponseCode() == 200) {
+            } else if (mediaFileUrlOrPath.toLowerCase().contains(".mpd")) {
 
-                        String contentType = conn.getContentType();
+                MediaSource mediaSource = buildDashMediaSource(Uri.parse(mediaFileUrlOrPath), userAgent, drmLicenceUrl);
+                exoPlayer.setMediaSource(mediaSource, true);
 
-                        if (contentType.equalsIgnoreCase("application/x-mpegURL")
-                                || contentType.equalsIgnoreCase("application/vnd.apple.mpegurl")
-                                || contentType.equalsIgnoreCase("video/mp2t")
-                        ) {
-                            MediaSource mediaSource = buildHlsMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
-                            new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaSource(mediaSource));
-                        } else if (contentType.equalsIgnoreCase("application/dash+xml")) {
-                            MediaSource mediaSource = buildDashMediaSource(Uri.parse(mediaStreamUrl), userAgent, drmLicenceUrl);
-                            new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaSource(mediaSource));
-                        } else {
-                            new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(mediaStreamUrl))));
+            } else {
+
+                new Thread(() -> {
+
+                    try {
+                        URL url = new URL(mediaFileUrlOrPath);
+                        HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+                        conn.setRequestMethod("HEAD");  // Use HEAD request to check content type
+                        conn.setRequestProperty("User-Agent", userAgent);
+                        conn.setRequestProperty("Referer", refererValue);
+
+                        // Enable following redirects
+                        conn.setInstanceFollowRedirects(true);
+
+                        if (conn.getResponseCode() == 200) {
+
+                            String contentType = conn.getContentType();
+
+                            if (contentType.equalsIgnoreCase("application/x-mpegURL")
+                                    || contentType.equalsIgnoreCase("application/vnd.apple.mpegurl")
+                                    || contentType.equalsIgnoreCase("video/mp2t")
+                            ) {
+                                MediaSource mediaSource = buildHlsMediaSource(Uri.parse(mediaFileUrlOrPath), userAgent, drmLicenceUrl);
+                                new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaSource(mediaSource));
+                            } else if (contentType.equalsIgnoreCase("application/dash+xml")) {
+                                MediaSource mediaSource = buildDashMediaSource(Uri.parse(mediaFileUrlOrPath), userAgent, drmLicenceUrl);
+                                new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaSource(mediaSource));
+                            } else {
+                                new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(mediaFileUrlOrPath))));
+                            }
                         }
+                        conn.disconnect();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(mediaFileUrlOrPath))));
                     }
-                    conn.disconnect();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(mediaStreamUrl))));
-                }
-            }).start();
+                }).start();
+            }
         }
+
 
         exoPlayer.prepare();
 
@@ -444,7 +477,11 @@ public class PlayerActivity extends AppCompatActivity {
 
                     bufferProgressbar.setVisibility(View.GONE);
 
-                    fileNameTV.setText(CustomMethods.getFileName(mediaStreamUrl));
+                    if (!Objects.equals(mediaFileName, "")) {
+                        fileNameTV.setText(mediaFileName);
+                    } else {
+                        fileNameTV.setText(CustomMethods.getFileName(mediaFileUrlOrPath));
+                    }
 
                     videoQualities = getVideoQualitiesTracks();
                 }

@@ -1,7 +1,47 @@
 <?xml version="1.0" encoding="utf-8"?>
-<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    app:cardElevation="3dp"
+    android:foreground="?android:attr/selectableItemBackground"
+    android:clickable="true"
+    android:focusable="true"
+    app:cardCornerRadius="5dp"
+    android:layout_margin="3dp">
 
-    
-</RelativeLayout>
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:foreground="?android:attr/selectableItemBackground"
+        android:padding="5dp">
+
+        <ImageView
+            android:id="@+id/thumbnailView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:src="@drawable/sample_thumbnail"
+            android:contentDescription="Thumbnail"
+            android:scaleType="centerCrop"
+            android:adjustViewBounds="true"
+            tools:ignore="HardcodedText"
+            android:foreground="?android:attr/selectableItemBackground"/>
+
+        <TextView
+            android:id="@+id/videoTitleTV"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="This is dummy text"
+            android:layout_below="@+id/thumbnailView"
+            tools:ignore="HardcodedText"
+            android:textAlignment="center"
+            android:textSize="16sp"
+            android:textColor="?attr/text_color"
+            android:maxLines="2"
+            android:padding="5dp"/>
+
+    </RelativeLayout>
+
+</androidx.cardview.widget.CardView>

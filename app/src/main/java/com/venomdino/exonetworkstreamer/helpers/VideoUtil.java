@@ -3,6 +3,7 @@ package com.venomdino.exonetworkstreamer.helpers;
 import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.media.ThumbnailUtils;
 import android.net.Uri;
 import android.os.Build;
@@ -24,10 +25,12 @@ public class VideoUtil {
         List<VideoInfoModel> videos = new ArrayList<>();
 
         String[] projection = {
+                MediaStore.Video.Media._ID,
                 MediaStore.Video.Media.DATA,
                 MediaStore.Video.Media.TITLE,
                 MediaStore.Video.Media.SIZE,
-                MediaStore.Video.Media.DATE_MODIFIED
+                MediaStore.Video.Media.DATE_MODIFIED,
+                MediaStore.Video.Media.DURATION
         };
 
         String sortOrder = MediaStore.Video.Media.DATE_MODIFIED + " DESC";
@@ -40,6 +43,7 @@ public class VideoUtil {
                 sortOrder
         )) {
             if (cursor != null) {
+                int idIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID);
                 int pathDataIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
                 int titleIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE);
                 int sizeIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE);
@@ -54,6 +58,7 @@ public class VideoUtil {
                     videoInfo.setVideoTitle(cursor.getString(titleIndex));
                     videoInfo.setVideoSize(cursor.getLong(sizeIndex));
                     videoInfo.setModifiedDate(cursor.getLong(dateModifiedIndex));
+//                    videoInfo.setVideoDuration(getVideoDuration(cursor.getString(pathDataIndex)));
                     videoInfo.setVideoDuration(cursor.getLong(durationIndex));
 
                     videos.add(videoInfo);
@@ -64,6 +69,36 @@ public class VideoUtil {
         }
 
         return videos;
+    }
+
+
+    // Helper method to get video duration using MediaMetadataRetriever
+    // Helper method to get video duration using MediaMetadataRetriever
+    private static long getVideoDuration(String videoPath) {
+        long duration = 0;
+        MediaMetadataRetriever retriever = null;
+
+        try {
+            retriever = new MediaMetadataRetriever();
+            retriever.setDataSource(videoPath);
+            String durationString = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+
+            if (durationString != null) {
+                duration = Long.parseLong(durationString);
+            }
+        } catch (Exception e) {
+            Log.e("VideoUtil", "Error getting video duration", e);
+        } finally {
+            if (retriever != null) {
+                try {
+                    retriever.release();
+                } catch (Exception e) {
+                    Log.e("VideoUtil", "Error releasing MediaMetadataRetriever", e);
+                }
+            }
+        }
+
+        return duration;
     }
 
     // Method defined but not in use

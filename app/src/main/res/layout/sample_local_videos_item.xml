@@ -45,7 +45,8 @@
                 android:layout_gravity="top|start"
                 android:paddingHorizontal="10dp"
                 android:paddingVertical="5dp"
-                android:layout_margin="5dp"/>
+                android:textSize="11sp"
+                android:layout_margin="0dp"/>
 
         </FrameLayout>
 
@@ -76,6 +77,8 @@
                 android:text="130.5 MB"
                 android:textAlignment="textStart"
                 android:paddingHorizontal="5dp"
+                android:textSize="11sp"
+                android:textStyle="bold"
                 tools:ignore="HardcodedText" />
 
             <TextView
@@ -86,6 +89,7 @@
                 tools:ignore="HardcodedText"
                 android:paddingHorizontal="5dp"
                 android:textAlignment="textEnd"
+                android:textSize="11sp"
                 android:layout_weight="1"/>
 
         </LinearLayout>

@@ -14,8 +14,43 @@ import android.view.inputmethod.InputMethodManager;
 import com.venomdino.exonetworkstreamer.R;
 
 import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
 
 public class CustomMethods {
+
+    public static String formatFileSize(long sizeInBytes) {
+        if (sizeInBytes <= 0) {
+            return "0 B";
+        }
+
+        final String[] units = new String[]{"B", "KB", "MB", "GB", "TB"};
+        int digitGroups = (int) (Math.log10(sizeInBytes) / Math.log10(1024));
+
+        return String.format(Locale.getDefault(), "%.2f %s", sizeInBytes / Math.pow(1024, digitGroups), units[digitGroups]);
+    }
+
+    public static String formatModifiedDate(long milliseconds) {
+        Date date = new Date(milliseconds);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
+        return sdf.format(date);
+    }
+
+    public static String formatDuration(long duration) {
+        // Convert milliseconds to seconds
+        long seconds = duration / 1000;
+
+        // Calculate hours, minutes, and remaining seconds
+        long hours = seconds / 3600;
+        long minutes = (seconds % 3600) / 60;
+        long remainingSeconds = seconds % 60;
+
+        // Format the duration as "hh:mm:ss" with Locale.US
+        return String.format(Locale.US, "%02d:%02d:%02d", hours, minutes, remainingSeconds);
+    }
+
+
 
     public static String getVersionName(Context context) {
         PackageInfo packageInfo;

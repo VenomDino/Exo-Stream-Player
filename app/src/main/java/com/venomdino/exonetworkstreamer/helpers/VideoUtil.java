@@ -44,6 +44,7 @@ public class VideoUtil {
                 int titleIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE);
                 int sizeIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE);
                 int dateModifiedIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_MODIFIED);
+                int durationIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION);
 
                 while (cursor.moveToNext()) {
 
@@ -53,6 +54,7 @@ public class VideoUtil {
                     videoInfo.setVideoTitle(cursor.getString(titleIndex));
                     videoInfo.setVideoSize(cursor.getLong(sizeIndex));
                     videoInfo.setModifiedDate(cursor.getLong(dateModifiedIndex));
+                    videoInfo.setVideoDuration(cursor.getLong(durationIndex));
 
                     videos.add(videoInfo);
                 }

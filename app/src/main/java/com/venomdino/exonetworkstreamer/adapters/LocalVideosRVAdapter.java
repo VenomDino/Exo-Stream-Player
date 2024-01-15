@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import com.bumptech.glide.Glide;
 import com.venomdino.exonetworkstreamer.R;
 import com.venomdino.exonetworkstreamer.activities.PlayerActivity;
+import com.venomdino.exonetworkstreamer.helpers.CustomMethods;
 import com.venomdino.exonetworkstreamer.models.VideoInfoModel;
 
 import java.util.List;
@@ -49,6 +50,9 @@ public class LocalVideosRVAdapter extends RecyclerView.Adapter<LocalVideosRVAdap
                 .into(holder.thumbnailView);
 
         holder.videoTitleTV.setText(video.getVideoTitle());
+        holder.videoDurationTV.setText(CustomMethods.formatDuration(video.getVideoDuration()));
+        holder.videoSizeTV.setText(CustomMethods.formatFileSize(video.getVideoSize()));
+        holder.modifiedDateTV.setText(CustomMethods.formatModifiedDate(video.getModifiedDate()));
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(activity, PlayerActivity.class);
@@ -67,13 +71,16 @@ public class LocalVideosRVAdapter extends RecyclerView.Adapter<LocalVideosRVAdap
     public static class MyCustomViewHolder extends RecyclerView.ViewHolder{
 
         ImageView thumbnailView;
-        TextView videoTitleTV;
+        TextView videoTitleTV, videoSizeTV, modifiedDateTV, videoDurationTV;
 
         public MyCustomViewHolder(@NonNull View itemView) {
             super(itemView);
 
             thumbnailView = itemView.findViewById(R.id.thumbnailView);
             videoTitleTV = itemView.findViewById(R.id.videoTitleTV);
+            videoSizeTV = itemView.findViewById(R.id.videoSizeTV);
+            modifiedDateTV = itemView.findViewById(R.id.modifiedDateTV);
+            videoDurationTV = itemView.findViewById(R.id.videoDurationTV);
         }
     }
 }

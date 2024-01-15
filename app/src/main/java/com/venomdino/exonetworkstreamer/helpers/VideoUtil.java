@@ -72,8 +72,7 @@ public class VideoUtil {
     }
 
 
-    // Helper method to get video duration using MediaMetadataRetriever
-    // Helper method to get video duration using MediaMetadataRetriever
+    // Method for retrieving video duration but not in use as it is too slow
     private static long getVideoDuration(String videoPath) {
         long duration = 0;
         MediaMetadataRetriever retriever = null;

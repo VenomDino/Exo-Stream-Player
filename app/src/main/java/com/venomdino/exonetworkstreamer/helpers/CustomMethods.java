@@ -31,8 +31,8 @@ public class CustomMethods {
         return String.format(Locale.getDefault(), "%.2f %s", sizeInBytes / Math.pow(1024, digitGroups), units[digitGroups]);
     }
 
-    public static String formatModifiedDate(long milliseconds) {
-        Date date = new Date(milliseconds);
+    public static String formatModifiedDate(long seconds) {
+        Date date = new Date(seconds * 1000);
         SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
         return sdf.format(date);
     }

@@ -117,11 +117,11 @@
         android:layout_marginTop="20dp"
         android:backgroundTint="@color/day_blue"
         android:text="Play"
-        android:textColor="#000000"
+        android:textColor="@color/white"
         android:textSize="18sp"
         app:icon="@drawable/play_arrow_24"
         app:iconGravity="textStart"
         app:iconSize="30dp"
         app:iconTint="@color/white"
-        tools:ignore="HardcodedText" />
+        tools:ignore="HardcodedText,TextContrastCheck" />
 </LinearLayout>

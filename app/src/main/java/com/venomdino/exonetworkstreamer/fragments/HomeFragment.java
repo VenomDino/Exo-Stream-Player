@@ -182,7 +182,7 @@ public class HomeFragment extends Fragment {
                     binding.drmLicenceUrlTil.setErrorEnabled(false);
 
                     Intent intent = new Intent(activity, PlayerActivity.class);
-                    intent.putExtra("mediaStreamUrl", mediaStreamUrl);
+                    intent.putExtra("mediaFileUrlOrPath", mediaStreamUrl);
                     intent.putExtra("drmLicenceUrl", drmLicenceUrl);
                     intent.putExtra("refererValue", refererValue);
                     intent.putExtra("userAgent", userAgent);

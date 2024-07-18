@@ -1,5 +1,6 @@
 package com.venomdino.exonetworkstreamer.fragments;
 
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.os.Bundle;
 import android.text.Editable;
@@ -23,9 +24,11 @@ import com.venomdino.exonetworkstreamer.models.VideoInfoModel;
 import java.util.List;
 
 @UnstableApi
-public class LocalVideosFragment extends Fragment {
+public class LocalVideosFragment extends Fragment{
 
     private FragmentLocalVideosBinding binding;
+    @SuppressLint("StaticFieldLeak")
+    public static LocalVideosRVAdapter adapter;
 
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -44,7 +47,7 @@ public class LocalVideosFragment extends Fragment {
             List<VideoInfoModel> videos = VideoUtil.getAllVideos(activity);
 
             if (videos.size() > 0) {
-                LocalVideosRVAdapter adapter = new LocalVideosRVAdapter(activity, videos);
+                adapter = new LocalVideosRVAdapter(activity, videos);
                 binding.recyclerView.setAdapter(adapter);
 
                 GridLayoutManager layoutManager = new GridLayoutManager(activity,2);

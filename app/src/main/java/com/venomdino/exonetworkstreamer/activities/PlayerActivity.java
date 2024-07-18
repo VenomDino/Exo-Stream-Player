@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.provider.Settings;
+import android.util.Log;
 import android.view.GestureDetector;
 import android.view.KeyEvent;
 import android.view.MotionEvent;
@@ -82,6 +83,7 @@ import java.util.UUID;
 @UnstableApi
 public class PlayerActivity extends AppCompatActivity {
 
+    private static final String TAG = "MADARA";
     private PlayerView playerView;
     private ProgressBar bufferProgressbar;
     private ExoPlayer exoPlayer;
@@ -106,7 +108,7 @@ public class PlayerActivity extends AppCompatActivity {
     private boolean hasRetried = false;
     private long playbackPosition = C.TIME_UNSET;
     private final HashMap<String, String> requestProperties = new HashMap<>();
-    private String mediaFileUrlOrPath, drmLicenceUrl, refererValue, userAgent;
+    private String mediaFileUrlOrPath, drmLicenceUrl, refererValue, originValue, userAgent;
     private boolean isLocalFile;
     private String mediaFileName = "";
 
@@ -154,6 +156,14 @@ public class PlayerActivity extends AppCompatActivity {
 
             if (!Objects.equals(refererValue, "")){
                 requestProperties.put("Referer", refererValue);
+            }
+        }
+
+        if (intent.hasExtra("originValue")) {
+            originValue = intent.getStringExtra("originValue");
+
+            if (!Objects.equals(originValue, "")){
+                requestProperties.put("Origin", originValue);
             }
         }
 
@@ -424,6 +434,7 @@ public class PlayerActivity extends AppCompatActivity {
                         conn.setRequestMethod("HEAD");  // Use HEAD request to check content type
                         conn.setRequestProperty("User-Agent", userAgent);
                         conn.setRequestProperty("Referer", refererValue);
+                        conn.setRequestProperty("Origin", originValue);
 
                         // Enable following redirects
                         conn.setInstanceFollowRedirects(true);
@@ -447,7 +458,7 @@ public class PlayerActivity extends AppCompatActivity {
                         }
                         conn.disconnect();
                     } catch (Exception e) {
-                        e.printStackTrace();
+                        Log.e(TAG, "initializePlayer: ", e);
                         new Handler(Looper.getMainLooper()).post(() -> exoPlayer.setMediaItem(MediaItem.fromUri(Uri.parse(mediaFileUrlOrPath))));
                     }
                 }).start();
@@ -773,7 +784,7 @@ public class PlayerActivity extends AppCompatActivity {
                     Settings.System.SCREEN_BRIGHTNESS
             );
         } catch (Settings.SettingNotFoundException e) {
-            e.printStackTrace();
+            Log.e(TAG, "getCurrentScreenBrightness: ", e);
         }
 
         // Get the maximum brightness value supported by the device's screen

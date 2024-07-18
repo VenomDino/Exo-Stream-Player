@@ -33,7 +33,9 @@ import com.google.android.play.core.install.model.UpdateAvailability;
 import com.venomdino.exonetworkstreamer.R;
 import com.venomdino.exonetworkstreamer.adapters.FragmentAdapter;
 import com.venomdino.exonetworkstreamer.databinding.ActivityMainBinding;
+import com.venomdino.exonetworkstreamer.fragments.LocalVideosFragment;
 import com.venomdino.exonetworkstreamer.helpers.CustomMethods;
+import com.venomdino.exonetworkstreamer.others.Statics;
 
 import java.util.Objects;
 
@@ -126,6 +128,15 @@ public class MainActivity extends AppCompatActivity {
                 Toast.makeText(this, "An error occurred during update.", Toast.LENGTH_SHORT).show();
             }
         }
+
+        if (requestCode == Statics.DELETE_VIDEO_REQUEST_CODE) {
+
+            if (resultCode == RESULT_OK){
+                LocalVideosFragment.adapter.onSuccess();
+            } else {
+                LocalVideosFragment.adapter.onFailed();
+            }
+        }
     }
 
     //    ==============================================================================================
@@ -181,7 +192,10 @@ public class MainActivity extends AppCompatActivity {
             if (permissionReadVideos != PackageManager.PERMISSION_GRANTED) {
 
                 ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},
+                        new String[]{
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                Manifest.permission.WRITE_EXTERNAL_STORAGE
+                        },
                         PERMISSION_REQUEST_CODE);
             }
         }

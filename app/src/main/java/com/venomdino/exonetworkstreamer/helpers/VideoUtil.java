@@ -43,7 +43,7 @@ public class VideoUtil {
                 sortOrder
         )) {
             if (cursor != null) {
-                int idIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID);
+                int videoID = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID);
                 int pathDataIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA);
                 int titleIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.TITLE);
                 int sizeIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media.SIZE);

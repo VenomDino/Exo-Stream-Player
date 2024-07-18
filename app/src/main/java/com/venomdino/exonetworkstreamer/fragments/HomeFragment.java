@@ -153,6 +153,7 @@ public class HomeFragment extends Fragment {
                 String mediaStreamUrl = Objects.requireNonNull(binding.mediaStreamUrlEt.getText()).toString().trim();
                 String drmLicenceUrl = Objects.requireNonNull(binding.drmLicenceUrlEt.getText()).toString().trim();
                 String refererValue = Objects.requireNonNull(binding.refererEt.getText()).toString();
+                String originValue = Objects.requireNonNull(binding.originEt.getText()).toString();
 
 
                 int selectedDrmScheme = binding.drmSchemeSelector.getSelectedItemPosition();
@@ -185,6 +186,7 @@ public class HomeFragment extends Fragment {
                     intent.putExtra("mediaFileUrlOrPath", mediaStreamUrl);
                     intent.putExtra("drmLicenceUrl", drmLicenceUrl);
                     intent.putExtra("refererValue", refererValue);
+                    intent.putExtra("originValue", originValue);
                     intent.putExtra("userAgent", userAgent);
                     intent.putExtra("selectedDrmScheme", selectedDrmScheme);
                     startActivity(intent);

@@ -4,10 +4,16 @@ import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.ClipData;
 import android.content.ClipboardManager;
+import android.content.ContentResolver;
+import android.content.ContentUris;
 import android.content.Context;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.database.Cursor;
+import android.net.Uri;
 import android.os.Handler;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 
@@ -19,6 +25,8 @@ import java.util.Date;
 import java.util.Locale;
 
 public class CustomMethods {
+
+    private static final String TAG = "MADARA";
 
     public static String formatFileSize(long sizeInBytes) {
         if (sizeInBytes <= 0) {
@@ -136,5 +144,38 @@ public class CustomMethods {
                         | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION // hide nav bar
                         | View.SYSTEM_UI_FLAG_FULLSCREEN // hide status bar
                         | View.SYSTEM_UI_FLAG_IMMERSIVE);
+    }
+
+//    ----------------------------------------------------------------------------------------------
+
+    public static boolean deleteVideo(Activity activity, long videoId) {
+        ContentResolver contentResolver = activity.getContentResolver();
+        Uri videoUri = ContentUris.withAppendedId(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, videoId);
+        try {
+            int rowsDeleted = contentResolver.delete(videoUri, null, null);
+            return rowsDeleted > 0;
+        } catch (SecurityException e) {
+            Log.e(TAG, "Error deleting video", e);
+            return false;
+        }
+    }
+
+    public static long getVideoIdFromPath(Activity activity, String videoPath) {
+        long videoId = -1;
+        ContentResolver contentResolver = activity.getContentResolver();
+        Uri uri = MediaStore.Video.Media.EXTERNAL_CONTENT_URI;
+
+        String[] projection = {MediaStore.Video.Media._ID};
+        String selection = MediaStore.Video.Media.DATA + " = ?";
+        String[] selectionArgs = {videoPath};
+
+        Cursor cursor = contentResolver.query(uri, projection, selection, selectionArgs, null);
+        if (cursor != null && cursor.moveToFirst()) {
+            int idIndex = cursor.getColumnIndexOrThrow(MediaStore.Video.Media._ID);
+            videoId = cursor.getLong(idIndex);
+            cursor.close();
+        }
+
+        return videoId;
     }
 }
